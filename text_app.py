@@ -98,7 +98,7 @@ if text_input and len(text_input) >= 20:
     st.pyplot(plot_text_complexity(V, V0, VN, A, B))
 
     st.header("Preview Text at Selected Noise Level")
-    noise_pct = st.slider("Select noise level (%)", 0, 100, 100, step=5)
+    noise_pct = st.slider("Select noise level (%)", 100, 0, 100, step=5)
     num_corrupt = int((noise_pct / 100) * len(text_input))
 
     if noise_pct > 0:
