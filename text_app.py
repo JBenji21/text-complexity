@@ -91,7 +91,7 @@ if text_input and len(text_input) >= 20:
 
     st.markdown(f"**A:** {A:.2f} bytes &nbsp;&nbsp; **B:** {B:.2f} bytes &nbsp;&nbsp; **A/B:** {A/B:.2f}")
     st.markdown(f"""
-**Complexity (C)**: `{C:.2f}` bytes²  
+**Complexity (C)**: `{C:.2f}` bytes  
 **Normalized Complexity (Cₙₒᵣₘ)**: `{C_norm:.6f}` (unitless, relative)
 """)
     st.pyplot(plot_text_complexity(V, V0, VN, A, B))
