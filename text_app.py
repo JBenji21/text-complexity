@@ -35,10 +35,9 @@ def estimate_text_complexity(text: str, steps=21, trials=30):
     N = steps - 1
     A = -N * VN + V[1:].sum()
     B = -V[1:].sum() + N * V0
-    C3 = VN * (V0 - VN) * A / B if (V0 != VN and B != 0) else 0
-    C3_norm = C3 / (V0**2) if V0 != 0 else 0
-
-    return V, V0, VN, A, B, C3, C3_norm
+    C = VN * (V0 - VN) * A / (B * V0) if (V0 != VN and B != 0) else 0
+    C_norm = C / (V0) if V0 != 0 else 0
+    return V, V0, VN, A, B, C, C_norm
 
 def plot_text_complexity(V, V0, VN, A, B):
     N = len(V) - 1
@@ -72,11 +71,11 @@ This app calculates the **structural complexity** of a block of text using a nov
 - The resulting curve reveals how structured and interdependent your text is.
 
 ### 📌 Complexity Metric (C):
-**C = (A/B) × V(N) × (V(0) − V(N))**  
-Measured in **bytes²**, it combines:
+**C = (A/B) × V(N) × ((V(0) − V(N))/V(0))**  
+Measured in **bytes**, it combines:
 - Emergence of structure (A/B)
 - Final compression size (V(N))
-- Compression gain (V(0) − V(N))
+- Compression gain (V(0) − V(N))/V(0)
 
 We also provide a **normalized version** (`Cₙₒᵣₘ`) to compare across texts of different lengths.
 """)
@@ -88,12 +87,12 @@ trials = st.slider("Trials per corruption level", 1, 50, 30)
 
 if text_input and len(text_input) >= 20:
     with st.spinner("Analyzing complexity..."):
-        V, V0, VN, A, B, C3, C3_norm = estimate_text_complexity(text_input, steps=steps, trials=trials)
+        V, V0, VN, A, B, C, C_norm = estimate_text_complexity(text_input, steps=steps, trials=trials)
 
     st.markdown(f"**A:** {A:.2f} bytes &nbsp;&nbsp; **B:** {B:.2f} bytes &nbsp;&nbsp; **A/B:** {A/B:.2f}")
     st.markdown(f"""
-**Complexity (C)**: `{C3:.2f}` bytes²  
-**Normalized Complexity (Cₙₒᵣₘ)**: `{C3_norm:.6f}` (unitless, relative)
+**Complexity (C)**: `{C:.2f}` bytes²  
+**Normalized Complexity (Cₙₒᵣₘ)**: `{C_norm:.6f}` (unitless, relative)
 """)
     st.pyplot(plot_text_complexity(V, V0, VN, A, B))
 
