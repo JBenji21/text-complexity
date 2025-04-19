@@ -35,9 +35,12 @@ def estimate_text_complexity(text: str, steps=21, trials=30):
     N = steps - 1
     A = -N * VN + V[1:].sum()
     B = -V[1:].sum() + N * V0
-    C = VN * (V0 - VN) * A / (B * V0) if (V0 != VN and B != 0) else 0
+    EF = A / B if B != 0 else 0
+    AC = VN
+    SS = (V0 - VN) / V0 if V0 != 0 else 0
+    C = EF * AC * SS
     C_norm = C / (V0) if V0 != 0 else 0
-    return V, V0, VN, A, B, C, C_norm
+    return V, V0, VN, A, B, EF, AC, SS, C, C_norm
 
 def plot_text_complexity(V, V0, VN, A, B):
     N = len(V) - 1
@@ -87,11 +90,19 @@ trials = st.slider("Trials per corruption level", 1, 50, 30)
 
 if text_input and len(text_input) >= 20:
     with st.spinner("Analyzing complexity..."):
-        V, V0, VN, A, B, C, C_norm = estimate_text_complexity(text_input, steps=steps, trials=trials)
+        V, V0, VN, A, B, EF, AC, SS, C, C_norm = estimate_text_complexity(text_input, steps=steps, trials=trials)
 
-    st.markdown(f"**A:** {A:.2f} bytes &nbsp;&nbsp; **B:** {B:.2f} bytes &nbsp;&nbsp; **A/B:** {A/B:.2f}")
     st.markdown(f"""
-**Complexity (C)**: `{C:.2f}` bytes  
+**Baseline size (V₀)**: `{V0:.1f}` bytes  
+**Structured size (Vₙ)**: `{VN:.1f}` bytes  
+
+**Emergence Factor (A/B)**: `{EF:.2f}`  
+**Absolute Complexity (Vₙ)**: `{AC:.1f}` bytes  
+**Structure Spread (SS)**: `{SS:.4f}`
+
+---
+
+**Emergent Structural Complexity (C):** `{C:.2f}` bytes,  
 **Normalized Complexity (Cₙₒᵣₘ)**: `{C_norm:.6f}` (unitless, relative)
 """)
     st.pyplot(plot_text_complexity(V, V0, VN, A, B))
