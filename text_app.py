@@ -33,8 +33,8 @@ def estimate_text_complexity(text: str, steps=21, trials=30):
     V = np.array(compressed_sizes)
     V0, VN = V[0], V[-1]
     N = steps - 1
-    A = -N * VN + V[1:].sum()
-    B = -V[1:].sum() + N * V0
+    A = -(N+1) * VN + V.sum()
+    B = -V.sum() + (N+1) * V0
     EF = A / B if B != 0 else 0
     AC = VN
     SS = (V0 - VN) / V0 if V0 != 0 else 0
