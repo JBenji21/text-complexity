@@ -83,14 +83,35 @@ Measured in **bytes**, it combines:
 We also provide a **normalized version** (`Cₙₒᵣₘ`) to compare across texts of different lengths.
 """)
 
-text_input = st.text_area("Enter or paste your text here:", height=300)
+# --- Input section ---
+uploaded_file = st.file_uploader(
+    "Upload a text file (.txt or .md)", type=["txt", "md"]
+)
+
+file_text = ""
+if uploaded_file is not None:
+    raw = uploaded_file.read()
+    # Try UTF‑8 first, fall back to latin‑1 so exotic chars don’t crash:
+    try:
+        file_text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        file_text = raw.decode("latin1", errors="ignore")
+
+text_input = st.text_area(
+    "Enter or edit your text here:",
+    value=file_text,          # pre‑populate if a file was uploaded
+    height=300
+)
+
+# Prefer whatever is in the box; fall back to the uploaded file’s text
+text_to_analyze = text_input.strip() or file_text
 
 steps = st.slider("Number of corruption levels", 5, 41, 21, step=2)
 trials = st.slider("Trials per corruption level", 1, 50, 30)
 
-if text_input and len(text_input) >= 20:
+if len(text_to_analyze) >= 20:
     with st.spinner("Analyzing complexity..."):
-        V, V0, VN, A, B, EF, AC, SS, C, C_norm = estimate_text_complexity(text_input, steps=steps, trials=trials)
+        V, V0, VN, A, B, EF, AC, SS, C, C_norm = estimate_text_complexity(text_to_analyze, steps=steps, trials=trials)
 
     st.markdown(f"""
 **Baseline size (V₀)**: `{V0:.1f}` bytes  
@@ -109,12 +130,12 @@ if text_input and len(text_input) >= 20:
 
     st.header("Preview Text at Selected Noise Level")
     noise_pct = st.slider("Select noise level (%)", 100, 0, 100, step=5)
-    num_corrupt = int((noise_pct / 100) * len(text_input))
+    num_corrupt = int((noise_pct / 100) * len(text_to_analyze))
 
     if noise_pct > 0:
-        preview = corrupt_text(text_input, num_corrupt)
+        preview = corrupt_text(text_to_analyze, num_corrupt)
         st.text_area(f"Corrupted Text ({noise_pct}% noise)", preview, height=300)
     else:
-        st.text_area("Original Text (0% noise)", text_input, height=300)
+        st.text_area("Original Text (0% noise)", text_to_analyze, height=300)
 else:
     st.info("Enter at least 20 characters of text to begin analysis.")
